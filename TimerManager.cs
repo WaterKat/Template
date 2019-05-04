@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,11 +9,21 @@ public class TimerManager : MonoBehaviour
     private static TimerManager _singleton = null;
     private static readonly object _lockobject = new object();
 
-    public static TimerManager main
+    public static TimerManager instance
     {
         get
         {
-            return _singleton;
+            if (_singleton != null)
+            {
+                return _singleton;
+            }
+            else
+            {
+                GameObject newHome  = new GameObject();
+                newHome.name = "TimerManager";
+                newHome.AddComponent<TimerManager>();
+                return newHome.GetComponent<TimerManager>();
+            }
         }
     }
 
@@ -43,7 +54,7 @@ public class TimerManager : MonoBehaviour
 
     Dictionary<string, float[]> Timers = new Dictionary<string, float[]>();
 
-    public bool AddTimer(float _duration, out string _timerName)
+    public static bool AddTimer(float _duration, out string _timerName)
     {
         bool NewTimerAdded = false;
 
@@ -56,27 +67,26 @@ public class TimerManager : MonoBehaviour
         }
 
         string _tempTimerName = "Anon" + (UnityEngine.Random.Range(0, 10000)).ToString();
-        while (Timers.ContainsKey(_tempTimerName))
+        while (instance.Timers.ContainsKey(_tempTimerName))
         {
             _tempTimerName = "Anon" + (UnityEngine.Random.Range(0, 10000)).ToString();
         }
         _timerName = _tempTimerName;
 
-        Timers.Add(_timerName, new float[2] { Time.time, Time.time + _duration });
+        instance.Timers.Add(_timerName, new float[2] { Time.time, Time.time + _duration });
 
         NewTimerAdded = true;
 
         return NewTimerAdded;
     }
 
-
-    public bool OverrideTimer(string _timerName, float _duration)
+    public static bool OverrideTimer(string _timerName, float _duration)
     {
         bool TimerOverrided = false;
 
-        if (Timers.ContainsKey(_timerName))
+        if (instance.Timers.ContainsKey(_timerName))
         {
-            Timers[_timerName] = new float[2] { Time.time, Time.time + _duration };
+            instance.Timers[_timerName] = new float[2] { Time.time, Time.time + _duration };
 
             TimerOverrided = true;
         }
@@ -88,13 +98,13 @@ public class TimerManager : MonoBehaviour
         return TimerOverrided;
     }
 
-    public bool RemoveTimer(string _timerName)
+    public static bool RemoveTimer(string _timerName)
     {
         bool TimerRemoved = false;
 
-        if (Timers.ContainsKey(_timerName))
+        if (instance.Timers.ContainsKey(_timerName))
         {
-            Timers.Remove(_timerName);
+            instance.Timers.Remove(_timerName);
 
             RemoveTasksWithTimer(_timerName);
         }
@@ -106,13 +116,13 @@ public class TimerManager : MonoBehaviour
         return TimerRemoved;
     }
 
-    public bool TimerMet(string _timerName)
+    public static bool TimerMet(string _timerName)
     {
         bool TimerMet = false;
 
-        if (Timers.ContainsKey(_timerName))
+        if (instance.Timers.ContainsKey(_timerName))
         {
-            float[] times = Timers[_timerName];
+            float[] times = instance.Timers[_timerName];
             if (Time.time > times[1])
             {
                 TimerMet = true;
@@ -120,6 +130,36 @@ public class TimerManager : MonoBehaviour
         }
 
         return TimerMet;
+    }
+
+    public static float TimeElapsed(string _timerName)
+    {
+        if (instance.Timers.ContainsKey(_timerName))
+        {
+            return (Time.time - instance.Timers[_timerName][0]);
+        }
+        else
+        {
+            Debug.LogWarning("TimerManager.TimeElapsed() Warning: TIMER doesn't exist!");
+        }
+        return 0f;
+    }
+
+    public static float deltaTimeElapsed(string _timerName)
+    {
+        float _deltaTime = 0f;
+
+        if (instance.Timers.ContainsKey(_timerName))
+        {
+            float[] _timerValues = instance.Timers[_timerName];
+            _deltaTime = (Time.time - _timerValues[0]) / (_timerValues[1] - _timerValues[0]);
+        }
+        else
+        {
+            Debug.LogWarning("TimerManager.deltaTime() Warning: TIMER doesn't exist!");
+        }
+
+        return _deltaTime;
     }
 
     struct TaskPair
@@ -136,12 +176,12 @@ public class TimerManager : MonoBehaviour
 
     Dictionary<string, TaskPair> Tasks = new Dictionary<string, TaskPair>();
 
-    public bool AddTask(Action _timedAction, float _duration, out string _taskName)
+    public static bool AddTask(Action _timedAction, float _duration, out string _taskName)
     {
         bool TaskAdded = false;
 
         string _tempTaskName = "Anon" + (UnityEngine.Random.Range(0, 10000)).ToString();
-        while (Tasks.ContainsKey(_tempTaskName))
+        while (instance.Tasks.ContainsKey(_tempTaskName))
         {
             _tempTaskName = "Anon" + (UnityEngine.Random.Range(0, 10000)).ToString();
         }
@@ -155,16 +195,40 @@ public class TimerManager : MonoBehaviour
 
         _taskName = _tempTaskName;
 
+        instance.Tasks.Add(_tempTaskName, new TaskPair(_localTimerName, _timedAction));
+
         return TaskAdded;
     }
 
-    public bool RemoveTask(string _taskName)
+    public static bool AddTask(Action _timedAction, float _duration)
+    {
+        bool TaskAdded = false;
+
+        string _tempTaskName = "Anon" + (UnityEngine.Random.Range(0, 10000)).ToString();
+        while (instance.Tasks.ContainsKey(_tempTaskName))
+        {
+            _tempTaskName = "Anon" + (UnityEngine.Random.Range(0, 10000)).ToString();
+        }
+
+        string _localTimerName;
+        if (!AddTimer(_duration, out _localTimerName))
+        {
+            _tempTaskName = "";
+            Debug.LogWarning("TimerManager.AddTask() Warning: AddTimer() Failed!");
+        }
+
+        instance.Tasks.Add(_tempTaskName, new TaskPair(_localTimerName, _timedAction));
+
+        return TaskAdded;
+    }
+
+    public static bool RemoveTask(string _taskName)
     {
         bool TaskRemoved = false;
 
-        if (Tasks.ContainsKey(_taskName))
+        if (instance.Tasks.ContainsKey(_taskName))
         {
-            Tasks.Remove(_taskName);
+            instance.Tasks.Remove(_taskName);
         }
         else
         {
@@ -174,15 +238,15 @@ public class TimerManager : MonoBehaviour
         return TaskRemoved;
     }
 
-    public bool RemoveTasksWithTimer(string _timerName)
+    public static bool RemoveTasksWithTimer(string _timerName)
     {
         bool TasksRemoved = false;
 
-        foreach (KeyValuePair<string, TaskPair> _keyValuePair in Tasks)
+        foreach (KeyValuePair<string, TaskPair> _keyValuePair in instance.Tasks)
         {
             if (_keyValuePair.Value.TimerName == _timerName)
             {
-                Tasks.Remove(_keyValuePair.Key);
+                instance.Tasks.Remove(_keyValuePair.Key);
 
                 if (TasksRemoved == false)
                 {
@@ -194,13 +258,13 @@ public class TimerManager : MonoBehaviour
         return TasksRemoved;
     }
 
-    private bool RunTask(string _taskName)
+    private static bool RunTask(string _taskName)
     {
         bool TaskRun = false;
 
         try
         {
-            Tasks[_taskName].TimedAction();
+            instance.Tasks[_taskName].TimedAction();
         }
         catch 
         {
@@ -214,7 +278,7 @@ public class TimerManager : MonoBehaviour
 
     void Update()
     {
-        foreach (KeyValuePair<string,TaskPair> _keyValuePair in Tasks)
+        foreach (KeyValuePair<string,TaskPair> _keyValuePair in instance.Tasks.ToArray())
         {
             if (TimerMet(_keyValuePair.Value.TimerName))
             {
