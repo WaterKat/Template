@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TimerManager : MonoBehaviour
+public class TimerManager_OLD : MonoBehaviour
 {
     private static TimerManager _singleton = null;
     private static readonly object _lockobject = new object();
@@ -19,7 +19,7 @@ public class TimerManager : MonoBehaviour
             }
             else
             {
-                GameObject newHome = new GameObject();
+                GameObject newHome  = new GameObject();
                 newHome.name = "TimerManager";
                 newHome.AddComponent<TimerManager>();
                 return newHome.GetComponent<TimerManager>();
@@ -27,7 +27,7 @@ public class TimerManager : MonoBehaviour
         }
     }
 
-    TimerManager() { }
+    TimerManager_OLD() { }
 
     void Awake()
     {
@@ -49,69 +49,31 @@ public class TimerManager : MonoBehaviour
                 }
             }
         }
-
         transform.gameObject.name = "TimerManager";
     }
 
-    struct TimePair
-    {
-        public float StartTime;
-
-        float endTime;
-        public float EndTime
-        {
-            get { return endTime; }
-            set
-            {
-                if (value >= StartTime)
-                {
-                    endTime = value;
-                }
-                else
-                {
-                    Debug.LogWarning("TimerManager.AddTimer() Warning: Cannot have negative TIMER duration!");
-                    endTime = StartTime;
-                }
-            }
-        }
-
-        public TimePair(float _startTime,float _endTime)
-        {
-            StartTime = _startTime;
-
-            if (_endTime >= _startTime)
-            {
-                endTime = _endTime;
-            }
-            else
-            {
-                Debug.LogWarning("TimerManager.AddTimer() Warning: Cannot have negative TIMER duration!");
-                endTime = _startTime;
-            }
-
-        }
-
-        public static TimePair TimePairWithDuration(float desiredDuration)
-        {
-            return new TimePair(Time.time, Time.time + desiredDuration);
-        }
-    }
-
-    Dictionary<string, TimePair> Timers = new Dictionary<string, TimePair>();
+    Dictionary<string, float[]> Timers = new Dictionary<string, float[]>();
 
     public static bool AddTimer(float _duration, out string _timerName)
     {
         bool NewTimerAdded = false;
-        _timerName = "";
 
-        string _tempTimerName = "WK" + Guid.NewGuid().ToString();
+        if (_duration <= 0)
+        {
+            Debug.LogWarning("TimerManager.AddTimer() Warning: Cannot have negative TIMER duration!");
+
+            _timerName = "";
+            return NewTimerAdded;
+        }
+
+        string _tempTimerName = "Anon" + (UnityEngine.Random.Range(0, 10000)).ToString();
         while (instance.Timers.ContainsKey(_tempTimerName))
         {
-            _tempTimerName = "WK" + Guid.NewGuid().ToString();
+            _tempTimerName = "Anon" + (UnityEngine.Random.Range(0, 10000)).ToString();
         }
         _timerName = _tempTimerName;
 
-        instance.Timers.Add(_timerName, TimePair.TimePairWithDuration(_duration));
+        instance.Timers.Add(_timerName, new float[2] { Time.time, Time.time + _duration });
 
         NewTimerAdded = true;
 
@@ -124,7 +86,7 @@ public class TimerManager : MonoBehaviour
 
         if (instance.Timers.ContainsKey(_timerName))
         {
-            instance.Timers[_timerName] = TimePair.TimePairWithDuration(_duration);
+            instance.Timers[_timerName] = new float[2] { Time.time, Time.time + _duration };
 
             TimerOverrided = true;
         }
@@ -160,8 +122,8 @@ public class TimerManager : MonoBehaviour
 
         if (instance.Timers.ContainsKey(_timerName))
         {
-            TimePair timePair = instance.Timers[_timerName];
-            if (Time.time > timePair.EndTime)
+            float[] times = instance.Timers[_timerName];
+            if (Time.time > times[1])
             {
                 TimerMet = true;
             }
@@ -174,7 +136,7 @@ public class TimerManager : MonoBehaviour
     {
         if (instance.Timers.ContainsKey(_timerName))
         {
-            return (Time.time - instance.Timers[_timerName].StartTime);
+            return (Time.time - instance.Timers[_timerName][0]);
         }
         else
         {
@@ -189,8 +151,8 @@ public class TimerManager : MonoBehaviour
 
         if (instance.Timers.ContainsKey(_timerName))
         {
-            TimePair timePair = instance.Timers[_timerName];
-            _deltaTime = (Time.time - timePair.StartTime) / (timePair.EndTime - timePair.StartTime);
+            float[] _timerValues = instance.Timers[_timerName];
+            _deltaTime = (Time.time - _timerValues[0]) / (_timerValues[1] - _timerValues[0]);
         }
         else
         {
@@ -218,10 +180,10 @@ public class TimerManager : MonoBehaviour
     {
         bool TaskAdded = false;
 
-        string _tempTaskName = "WKT" + Guid.NewGuid().ToString();
+        string _tempTaskName = "Anon" + (UnityEngine.Random.Range(0, 10000)).ToString();
         while (instance.Tasks.ContainsKey(_tempTaskName))
         {
-            _tempTaskName = "WKT" + Guid.NewGuid().ToString();
+            _tempTaskName = "Anon" + (UnityEngine.Random.Range(0, 10000)).ToString();
         }
 
         string _localTimerName;
@@ -242,10 +204,10 @@ public class TimerManager : MonoBehaviour
     {
         bool TaskAdded = false;
 
-        string _tempTaskName = "WKT" + Guid.NewGuid().ToString();
+        string _tempTaskName = "Anon" + (UnityEngine.Random.Range(0, 10000)).ToString();
         while (instance.Tasks.ContainsKey(_tempTaskName))
         {
-            _tempTaskName = "WKT" + Guid.NewGuid().ToString();
+            _tempTaskName = "Anon" + (UnityEngine.Random.Range(0, 10000)).ToString();
         }
 
         string _localTimerName;
