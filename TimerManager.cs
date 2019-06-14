@@ -53,6 +53,8 @@ public class TimerManager : MonoBehaviour
         transform.gameObject.name = "TimerManager";
     }
 
+    #region "Timers"
+
     struct TimePair
     {
         public float StartTime;
@@ -199,7 +201,9 @@ public class TimerManager : MonoBehaviour
 
         return _deltaTime;
     }
+    #endregion
 
+    #region "Tasks"
     struct TaskPair
     {
         public string TimerName;
@@ -313,6 +317,124 @@ public class TimerManager : MonoBehaviour
         TaskRun = true;
         return TaskRun;
     }
+    #endregion
+
+    #region "LoopedTasks"
+    struct LoopedTaskPair
+    {
+        public string TimerName;
+        public Action<float> TimedAction;
+
+        public LoopedTaskPair(string _timerName, Action<float> _timedAction)
+        {
+            TimerName = _timerName;
+            TimedAction = _timedAction;
+        }
+    }
+
+    Dictionary<string, LoopedTaskPair> LoopedTasks = new Dictionary<string, LoopedTaskPair>();
+
+    public static bool AddLoopedTask(Action<float> _timedAction, float _duration, out string _taskName)
+    {
+        bool TaskAdded = false;
+
+        string _tempTaskName = "WKLT" + Guid.NewGuid().ToString();
+        while (instance.Tasks.ContainsKey(_tempTaskName))
+        {
+            _tempTaskName = "WKLT" + Guid.NewGuid().ToString();
+        }
+
+        string _localTimerName;
+        if (!AddTimer(_duration, out _localTimerName))
+        {
+            _tempTaskName = "";
+            Debug.LogWarning("TimerManager.AddLoopedTask() Warning: AddTimer() Failed!");
+        }
+
+        _taskName = _tempTaskName;
+
+        instance.LoopedTasks.Add(_tempTaskName, new LoopedTaskPair(_localTimerName, _timedAction));
+
+        return TaskAdded;
+    }
+
+    public static bool AddLoopedTask(Action<float> _timedAction, float _duration)
+    {
+        bool TaskAdded = false;
+
+        string _tempTaskName = "WKLT" + Guid.NewGuid().ToString();
+        while (instance.Tasks.ContainsKey(_tempTaskName))
+        {
+            _tempTaskName = "WKLT" + Guid.NewGuid().ToString();
+        }
+
+        string _localTimerName;
+        if (!AddTimer(_duration, out _localTimerName))
+        {
+            _tempTaskName = "";
+            Debug.LogWarning("TimerManager.AddLoopedTask() Warning: AddTimer() Failed!");
+        }
+
+        instance.LoopedTasks.Add(_tempTaskName, new LoopedTaskPair(_localTimerName, _timedAction));
+
+        return TaskAdded;
+    }
+
+    public static bool RemoveLoopedTask(string _taskName)
+    {
+        bool TaskRemoved = false;
+
+        if (instance.LoopedTasks.ContainsKey(_taskName))
+        {
+            instance.LoopedTasks.Remove(_taskName);
+        }
+        else
+        {
+            Debug.LogWarning("TimerManager.RemoveLoopedTask() Warning: Desired LOOPEDTASK name doesn't exist!");
+        }
+
+        return TaskRemoved;
+    }
+
+    public static bool RemoveLoopedTasksWithTimer(string _timerName)
+    {
+        bool TasksRemoved = false;
+
+        foreach (KeyValuePair<string, LoopedTaskPair> _keyValuePair in instance.LoopedTasks)
+        {
+            if (_keyValuePair.Value.TimerName == _timerName)
+            {
+                instance.LoopedTasks.Remove(_keyValuePair.Key);
+
+                if (TasksRemoved == false)
+                {
+                    TasksRemoved = true;
+                }
+            }
+        }
+
+        return TasksRemoved;
+    }
+
+    private static bool RunLoopedTask(string _taskName)
+    {
+        bool TaskRun = false;
+
+        try
+        {
+            float timeElapsed = TimerManager.TimeElapsed(instance.LoopedTasks[_taskName].TimerName);
+            instance.LoopedTasks[_taskName].TimedAction(timeElapsed);
+        }
+        catch
+        {
+            Debug.LogWarning("TimerManager.RunLoopedTask() Warning: LOOPEDTASK failed to run!");
+            return false;
+        }
+
+        TaskRun = true;
+        return TaskRun;
+    }
+    #endregion
 
     void Update()
     {
@@ -323,6 +445,20 @@ public class TimerManager : MonoBehaviour
                 RunTask(_keyValuePair.Key);
                 RemoveTask(_keyValuePair.Key);
                 RemoveTimer(_keyValuePair.Value.TimerName);
+            }
+        }
+
+        foreach (KeyValuePair<string, LoopedTaskPair> _keyValuePair in instance.LoopedTasks.ToArray())
+        {
+            if (TimerMet(_keyValuePair.Value.TimerName))
+            {
+                RunLoopedTask(_keyValuePair.Key);
+                RemoveLoopedTask(_keyValuePair.Key);
+                RemoveTimer(_keyValuePair.Value.TimerName);
+            }
+            else
+            {
+                RunLoopedTask(_keyValuePair.Key);
             }
         }
     }
