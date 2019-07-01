@@ -32,13 +32,14 @@ public class ExampleClass : MonoBehaviour
 */
 
 
-FEATURES
+AUDIO MANAGER FEATURES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 EDITOR ONLY VARIABLES											//These are variables that will change the initial behavior of the AudioManager
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 StartingAudioName: This is the first audio clip that will be loaded on Start()
+
 mainAudioPath: This is the path in which you shoud create you AudioInterface scriptable objects
 
 
@@ -64,3 +65,33 @@ CONTEXT MENU METHODS											//Right click the AudioManager Monobehavior to op
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 "UpdateAssets() Warning! This WILL override CURRENT DATA!"		//This will erase all contents in the Monobehaviors AudioInterface list and create a new one from mainAudioPath
+
+AUDIO INTERFACE FEATURES
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+EDITOR ONLY SCRIPTABLEOBJECT VARIABLES							//These are variables that will change the initial behavior of the AudioInterface
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+name					//The name of the ScriptableObject used for lookup
+
+audioMixerGroup			//By default routed to included AudioMixerGroup, this lets you mix and balance your game audio
+
+audioClip				//The sound clip you want to use
+
+Mute					//Mutes sound
+
+Loop					//Determines if sound loops or not
+
+Volume					//The sound volume
+
+Pitch					//The sound pitch
+
+Reverse					//Plays the sound in reverse
+
+RandomVolumeModifier	//Adds randomness to sound volume
+
+RandomPitchModifier		//Adds randomness to sound pitch
+
+
+AUDIO MIXER GROUP FEATURES
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

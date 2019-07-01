@@ -62,31 +62,37 @@ namespace WaterKat.Audio
 
         public void Play()
         {
+            if (audioSource == null) { return; }
             audioSource.volume = Volume * (1 + Random.Range(-RandomVolumeModifier / 2f, RandomVolumeModifier / 2f));
             audioSource.pitch = Pitch * (1 + Random.Range(-RandomPitchModifier / 2f, RandomPitchModifier / 2f));
             audioSource.Play();
         }
         public void Play(float _delay)
         {
+            if (audioSource == null) { return; }
             audioSource.volume = Volume * (1 + Random.Range(-RandomVolumeModifier / 2f, RandomVolumeModifier / 2f));
             audioSource.pitch = Pitch * (1 + Random.Range(-RandomPitchModifier / 2f, RandomPitchModifier / 2f));
             audioSource.PlayDelayed(_delay);
         }
         public void Pause()
         {
+            if (audioSource == null) { return; }
             audioSource.Pause();
         }
         public void unPause()
         {
+            if (audioSource == null) { return; }
             audioSource.UnPause();
         }
         public void Stop()
         {
+            if (audioSource == null) { return; }
             audioSource.Stop();
         }
 
         public void PlayAtPoint(Vector3 vector3Point)
         {
+            if (audioSource == null) { return; }
             float tempVolume = Volume * (1 + Random.Range(-RandomVolumeModifier / 2f, RandomVolumeModifier / 2f)); 
             AudioSource.PlayClipAtPoint(audioClip, vector3Point, tempVolume);
         }
