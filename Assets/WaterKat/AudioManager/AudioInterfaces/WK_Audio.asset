@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2efb009923eb614479ad453cde8313e3, type: 3}
+  m_Name: WK_Audio
+  m_EditorClassIdentifier: 
+  audioMixerGroup: {fileID: 2272629675763874402, guid: 42755c087d8177447b9fbc05d96afd18,
+    type: 2}
+  audioClip: {fileID: 8300000, guid: 7ccb34a566fc4294c901bb1f2f590ddb, type: 3}
+  Mute: 0
+  Loop: 0
+  Volume: 1
+  Pitch: 1
+  Reverse: 0
+  RandomVolumeModifier: 0.103
+  RandomPitchModifier: 0.102
