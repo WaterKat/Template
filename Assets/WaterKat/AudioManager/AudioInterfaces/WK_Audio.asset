@@ -20,5 +20,5 @@ MonoBehaviour:
   Volume: 1
   Pitch: 1
   Reverse: 0
-  RandomVolumeModifier: 0.103
-  RandomPitchModifier: 0.102
+  RandomVolumeModifier: 0.1
+  RandomPitchModifier: 0.1
