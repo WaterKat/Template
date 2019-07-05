@@ -99,10 +99,10 @@ namespace WaterKat.Audio
             if (
             GUILayout.Button("Export!"))
             {
-                float[] newdata = new float[(int)((TrimSlider.maxVal-TrimSlider.minVal)/TrimSlider.originalmaxLimit)*sourceClip.samples];
+                float[] newdata = new float[(int)((TrimSlider.maxVal - TrimSlider.minVal) / TrimSlider.originalmaxLimit) * sourceClip.samples];
                 sourceClip.GetData(newdata, (int)TrimSlider.minLimit * sourceClip.samples);
-                ExportClip.SetData(newdata,0);
-    
+                ExportClip.SetData(newdata, 0);
+            }
         }
         void UpdateScreen()
         {
