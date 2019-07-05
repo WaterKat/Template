@@ -56,7 +56,7 @@ namespace WaterKat.Audio
 
         void OnGUI()
         {
-            if ((OldScreenSize.x != position.width)|| (OldScreenSize.y != position.height))
+            if ((OldScreenSize.x != position.width) || (OldScreenSize.y != position.height))
             {
                 UpdateScreen();
                 OldScreenSize = new Vector2(position.width, position.height);
@@ -86,7 +86,7 @@ namespace WaterKat.Audio
                 float min = TrimSlider.minVal;
                 float max = TrimSlider.maxVal;
                 EditorGUILayout.MinMaxSlider(ref TrimSlider.minVal, ref TrimSlider.maxVal, TrimSlider.minLimit, TrimSlider.maxLimit);
-                if ((ZoomSlider.minVal != min)|| (ZoomSlider.maxVal != max))
+                if ((ZoomSlider.minVal != min) || (ZoomSlider.maxVal != max))
                 {
                     //darkenedAudioTexture = SpectrographTexture(sourceClip, 4);
                     darkenedAudioTexture = UpdateDarkenedTexture(SpectrographTexture(sourceClip, 4));
@@ -96,7 +96,12 @@ namespace WaterKat.Audio
 
 
             ExportClip = EditorGUILayout.ObjectField("Export Audio", ExportClip, typeof(AudioClip), false) as AudioClip;
-            GUILayout.Button("Export!");
+            if (
+            GUILayout.Button("Export!"))
+            {
+                float[] newdata = new float[(int)((TrimSlider.maxVal-TrimSlider.minVal)/TrimSlider.originalmaxLimit)*sourceClip.samples];
+                sourceClip.GetData(newdata, (int)TrimSlider.minLimit * sourceClip.samples);
+                ExportClip.SetData(newdata,0);
     
         }
         void UpdateScreen()
@@ -117,7 +122,7 @@ namespace WaterKat.Audio
 
             for (int x = 0; x < width; x++)
             {
-                if ((x < minPixel) || (x > maxPixel))
+                if ((x == (int)minPixel) || (x == (int)maxPixel))
                 {
                     for (int y = 0; y < height; y++)
                     {
