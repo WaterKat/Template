@@ -5,7 +5,7 @@ using UnityEngine.Audio;
 using UnityEditor;
 using System;
 
-namespace WaterKat.Audio
+namespace WaterKat.AudioManager
 {
     public class AudioManager : MonoBehaviour
     {

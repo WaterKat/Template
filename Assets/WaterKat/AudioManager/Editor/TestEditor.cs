@@ -3,9 +3,9 @@ using UnityEditor;
 using UnityEngine.UIElements;
 using Unity.Collections;
 
-namespace WaterKat.Audio
+namespace WaterKat.AudioManager
 {
-    public class AudioEditor : EditorWindow
+    public class TestAudioEditor : EditorWindow
     {
         AudioClip sourceClip;
         AudioClip SourceClip
@@ -19,11 +19,11 @@ namespace WaterKat.Audio
         Texture darkenedAudioTexture;
 
         // Add menu named "My Window" to the Window menu
-        [MenuItem("WaterKat/AudioEditor", false, 50)]
+        [MenuItem("WaterKat/TestAudioEditor", false, 50)]
         static void Init()
         {
             // Get existing open window or if none, make a new one:
-            AudioEditor window = (AudioEditor)EditorWindow.GetWindow(typeof(AudioEditor));
+            TestAudioEditor window = (TestAudioEditor)EditorWindow.GetWindow(typeof(TestAudioEditor));
             window.Show();
             
         }

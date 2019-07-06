@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 
-namespace WaterKat.Audio
+namespace WaterKat.AudioManager
 {
     [CreateAssetMenu(fileName = "NewAudioInterface", menuName = "WaterKat/Audio/AudioInterface", order = 50)]
     public class AudioInterface : ScriptableObject
