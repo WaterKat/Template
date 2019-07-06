@@ -65,7 +65,10 @@ namespace WaterKat.Audio
             SourceClip = EditorGUILayout.ObjectField("Source Audio", SourceClip, typeof(AudioClip), false) as AudioClip;
 
             EditorGUILayout.LabelField("Zoom", EditorStyles.boldLabel);
-            GUILayout.Box(miniDisplay, new GUIStyle() { margin = new RectOffset(), fixedHeight = miniDisplay.height, fixedWidth = miniDisplay.width }, new GUILayoutOption[] { });
+            if (miniDisplay != null)
+            {
+                GUILayout.Box(miniDisplay, new GUIStyle() { margin = new RectOffset(), fixedHeight = miniDisplay.height, fixedWidth = miniDisplay.width }, new GUILayoutOption[] { });
+            }
 
             { //This controls the ZoomSlider
                 float min = ZoomSlider.minVal;
@@ -99,9 +102,21 @@ namespace WaterKat.Audio
             if (
             GUILayout.Button("Export!"))
             {
-                float[] newdata = new float[(int)((TrimSlider.maxVal - TrimSlider.minVal) / TrimSlider.originalmaxLimit) * sourceClip.samples];
-                sourceClip.GetData(newdata, (int)TrimSlider.minLimit * sourceClip.samples);
-                ExportClip.SetData(newdata, 0);
+                float[] sourceData = new float[sourceClip.samples*sourceClip.channels];
+                sourceClip.GetData(sourceData, 0);
+                float[] newdata = new float[(int)((TrimSlider.maxVal - TrimSlider.minVal) / TrimSlider.originalmaxLimit* sourceData.Length)];
+                int startData = (int)(TrimSlider.minVal / TrimSlider.originalmaxLimit * sourceData.Length);
+                for (int  i = 0;  i <newdata.Length;  i++)
+                {
+                    newdata[i] =  sourceData[startData+i];
+                }
+
+                AudioClip test = AudioClip.Create("Output", newdata.Length,sourceClip.channels,SourceClip.frequency,false);
+                test.SetData(newdata,0);
+                SavWav.Save("Test", test);
+                Debug.Log("OldSamples" + sourceClip.samples);
+                Debug.Log("NewSamples" + ExportClip.samples);
+                Debug.Log("DONE");
             }
         }
         void UpdateScreen()
@@ -155,7 +170,7 @@ namespace WaterKat.Audio
                 }
             }
             */
-            float[] audioData = new float[audioClip.samples];
+            float[] audioData = new float[sourceClip.samples * sourceClip.channels];
             audioClip.GetData(audioData, 0);
 
             for (int x = 0; x < width; x++)
@@ -215,7 +230,7 @@ namespace WaterKat.Audio
                 }
             }*/
             
-            float[] audioData = new float[audioClip.samples];
+            float[] audioData = new float[sourceClip.samples * sourceClip.channels];
             audioClip.GetData(audioData, 0);
             
             for (int x = 0; x < width; x++)
