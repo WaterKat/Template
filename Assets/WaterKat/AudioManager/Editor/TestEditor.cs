@@ -13,7 +13,7 @@ namespace WaterKat.AudioManager
             get { return sourceClip; }
             set { if (value == sourceClip) { return; } sourceClip = value; miniDisplay = UnzoomedSpectrographTexture(sourceClip, 40); ; }
         }
-        AudioClip ExportClip;
+        //AudioClip ExportClip;
 
         Texture miniDisplay;
         Texture darkenedAudioTexture;
@@ -98,7 +98,7 @@ namespace WaterKat.AudioManager
             }
 
 
-            ExportClip = EditorGUILayout.ObjectField("Export Audio", ExportClip, typeof(AudioClip), false) as AudioClip;
+            //ExportClip = EditorGUILayout.ObjectField("Export Audio", ExportClip, typeof(AudioClip), false) as AudioClip;
             if (
             GUILayout.Button("Export!"))
             {
@@ -115,7 +115,7 @@ namespace WaterKat.AudioManager
                 test.SetData(newdata,0);
                 SavWav.Save("Test", test);
                 Debug.Log("OldSamples" + sourceClip.samples);
-                Debug.Log("NewSamples" + ExportClip.samples);
+                //Debug.Log("NewSamples" + ExportClip.samples);
                 Debug.Log("DONE");
             }
         }
