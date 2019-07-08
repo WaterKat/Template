@@ -370,6 +370,11 @@ namespace WaterKat.AudioEditor
             textureStack.Clear();
             RecalculateTextureStack();
         }
+
+        Texture2DStack(int sizeX,int sizeY)
+        {
+            root = new Texture2D
+        }
     }
 
     class Slider
