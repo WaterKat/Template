@@ -37,7 +37,7 @@ namespace WaterKat.AudioEditor
         GUIStyle ImagePreviews;
         GUIStyle LabelRightAligned;
         GUIStyle LabelCenterAligned;
-        
+
         public void CreateStyles()
         {
             ImagePreviews = new GUIStyle() { margin = new RectOffset(7, 7, 0, 0) };
@@ -107,8 +107,6 @@ namespace WaterKat.AudioEditor
 
             GUILayout.Space(20);
 
-
-
             {
                 GUILayout.Label("Zoom", EditorStyles.boldLabel);
 
@@ -121,27 +119,45 @@ namespace WaterKat.AudioEditor
 
             GUILayout.Space(20);
 
+
             GUILayout.Label("Audio Preview", EditorStyles.boldLabel);
 
-            GUILayout.BeginHorizontal();
-            GUILayout.Label(timeFloatToString(ZoomSlider.minValue));
-            GUILayout.Label(timeFloatToString(ZoomSlider.maxValue), LabelRightAligned);
-            GUILayout.EndHorizontal();
 
-            Texture2D testtexture = test.renderTimeMarkers((int)position.width - 14, 20, ZoomSlider);
+            //Texture2D testtexture = test.renderTimeMarkers((int)position.width - 14, 20, ZoomSlider);
 
-            Vector2 mousePosition = Event.current.mousePosition;
+            {
+                GUILayout.BeginHorizontal();
+                GUILayout.Label(timeFloatToString(ZoomSlider.minValue));
+                GUILayout.Label(timeFloatToString(ZoomSlider.maxValue), LabelRightAligned);
+                GUILayout.EndHorizontal();
 
-            GUILayout.Box(testtexture, ImagePreviews);
+                GUILayout.Box(TimeTexture.renderTimeMarkers(ImageWidth, ImageHeight, ZoomSlider), ImagePreviews);
 
-            GUI.Label(new Rect(mousePosition.x, mousePosition.y, 100, 40), GUI.tooltip);
+                Rect barRect = GUILayoutUtility.GetLastRect();
+                Vector2 mousePosition = Event.current.mousePosition;
 
+                if (Event.current.type == EventType.Repaint && barRect.Contains(mousePosition))
+                {
+                    float relativeMousePosition = relativePosition(mousePosition.x, barRect.x, barRect.x + barRect.width);
+                    float relativeTime = Mathf.Lerp(ZoomSlider.minValue, ZoomSlider.maxValue, relativeMousePosition);
+                    GUI.Label(new Rect(mousePosition.x + 15 + (-85 * relativeMousePosition), mousePosition.y + 30, 300, 100), timeFloatToString(relativeTime));
+                }
+            }// TimeBar
 
+            {
+                GUILayout.Box(test.SpectrographIcon(ImageWidth, ImageHeight * 4, sourceClip), ImagePreviews);
+            }
         }
 
         string timeFloatToString(float desiredTime)
         {
             return Mathf.FloorToInt(desiredTime / 60).ToString("00") + ":" + ((desiredTime) % 60).ToString("00.00");
+        }
+        public static float relativePosition(float point, float minLimit, float maxLimit)
+        {
+            float relativePoint = point - minLimit;
+            float relativeSize = maxLimit - minLimit;
+            return (relativePoint / relativeSize);
         }
     }
 
@@ -153,13 +169,6 @@ namespace WaterKat.AudioEditor
         public float startLength;
         public float endLength;
         public Texture2D lastTexture;
-
-        float relativePosition(float point, float minLimit,float maxLimit)
-        {
-            float relativePoint = point - minLimit;
-            float relativeSize = maxLimit - minLimit;
-            return (relativePoint / relativeSize);
-        }
 
         void normalizeData(float[] table)
         {
@@ -177,7 +186,7 @@ namespace WaterKat.AudioEditor
             }
         }
 
-        public Texture2D SpectrographIcon(int sizeX,int sizeY,AudioClip audioClip)
+        public Texture2D SpectrographIcon(int sizeX, int sizeY, AudioClip audioClip)
         {
             int originOffset = sizeY / 2;
             Texture2D audioTexture = new Texture2D(sizeX, sizeY, TextureFormat.ARGB32, false);
@@ -190,22 +199,22 @@ namespace WaterKat.AudioEditor
 
             for (int x = 0; x < sizeX; x++)
             {
-                int sampleIndex = Mathf.FloorToInt(relativePosition(x,0,sizeX)*audioData.Length);
+                int sampleIndex = Mathf.FloorToInt(AudioEditor.relativePosition(x, 0, sizeX) * audioData.Length);
                 float scaledSample = audioData[sampleIndex] * originOffset;
 
                 for (int i = 0; Mathf.Abs(i) < Mathf.Abs(scaledSample); i += (int)Mathf.Sign(scaledSample))
                 {
-                    audioTexture.SetPixel(x, Mathf.Clamp(i + originOffset, 0, sizeY), new Color(0, 0.5f, 0.5f,1));
+                    audioTexture.SetPixel(x, Mathf.Clamp(i + originOffset, 0, sizeY), new Color(0, 0.5f, 0.5f, 1));
                 }
 
                 audioTexture.SetPixel(x, (int)scaledSample + originOffset, new Color(0, 0.5f, 0.5f, 1));
             }
-                       
+
             audioTexture.Apply();
             return audioTexture;
         }
 
-        public Texture2D ZoomedWaveform(int sizeX,int sizeY, MinMaxSlider zoomSlider,AudioClip audioClip)
+        public Texture2D ZoomedWaveform(int sizeX, int sizeY, MinMaxSlider zoomSlider, AudioClip audioClip)
         {
             int originOffset = sizeY / 2;
             Texture2D audioTexture = new Texture2D(sizeX, sizeY, TextureFormat.ARGB32, false);
@@ -218,22 +227,22 @@ namespace WaterKat.AudioEditor
 
             for (int x = 0; x < sizeX; x++)
             {
-                int sampleIndex = Mathf.FloorToInt(relativePosition(x,0,sizeX)*audioData.Length);
+                int sampleIndex = Mathf.FloorToInt(AudioEditor.relativePosition(x, 0, sizeX) * audioData.Length);
                 float scaledSample = audioData[sampleIndex] * originOffset;
 
                 for (int i = 0; Mathf.Abs(i) < Mathf.Abs(scaledSample); i += (int)Mathf.Sign(scaledSample))
                 {
-                    audioTexture.SetPixel(x, Mathf.Clamp(i + originOffset, 0, sizeY), new Color(0, 0.5f, 0.5f,1));
+                    audioTexture.SetPixel(x, Mathf.Clamp(i + originOffset, 0, sizeY), new Color(0, 0.5f, 0.5f, 1));
                 }
 
                 audioTexture.SetPixel(x, (int)scaledSample + originOffset, new Color(0, 0.5f, 0.5f, 1));
             }
-                       
+
             audioTexture.Apply();
             return audioTexture;
         }
 
-        public Texture2D renderTimeMarkers(int sizex, int sizey, MinMaxSlider zoomSlider)
+        public static Texture2D renderTimeMarkers(int sizex, int sizey, MinMaxSlider zoomSlider)
         {
             float startTime = zoomSlider.minValue;
             float endTime = zoomSlider.maxValue;
@@ -241,47 +250,125 @@ namespace WaterKat.AudioEditor
             Texture2D tempTexture = new Texture2D((int)sizex, (int)sizey, TextureFormat.ARGB32, false);
             tempTexture.wrapMode = TextureWrapMode.Clamp;
 
-            float[] Divisions = new float[] { 60, 30, 15, 5, 1, 0.5f , 0.25f };
-            float[] BarLengths = new float[] { 1, .78f, .7f, .6f, .48f, .3f ,.2f};
+            float[] Divisions = new float[] { 60, 30, 15, 5, 1, 0.5f, 0.25f };
+            float[] BarLengths = new float[] { 1, .78f, .7f, .6f, .48f, .3f, .2f };
             int times = Divisions.Length;
             if (endTime - startTime > 10f) { times--; }
             if (endTime - startTime > 30f) { times--; }
             if (endTime - startTime > 60f) { times--; }
-            for (int i = times-1; i >=0; i--)
+            for (int i = times - 1; i >= 0; i--)
             {
                 int Bars = Mathf.FloorToInt(endTime / Divisions[i]);
                 for (int x = 1; x <= Bars; x++)
                 {
-                    int relativeX = Mathf.FloorToInt(relativePosition(Divisions[i] * x, startTime, endTime)*sizex);
-                    for (int y = sizey-Mathf.FloorToInt(sizey*BarLengths[i]); y < sizey; y++)
+                    int relativeX = Mathf.FloorToInt(AudioEditor.relativePosition(Divisions[i] * x, startTime, endTime) * sizex);
+                    for (int y = sizey - Mathf.FloorToInt(sizey * BarLengths[i]); y < sizey; y++)
                     {
-                        tempTexture.SetPixel(relativeX, y, new Color(1*(1-Mathf.Pow((float)i/times,2)), 0, (float)i / times, 1));
+                        tempTexture.SetPixel(relativeX, y, new Color(1 * (1 - Mathf.Pow((float)i / times, 2)), 0, (float)i / times, 1));
                     }
                 }
             }
-
             for (int x = 0; x < sizex; x++)
             {
-                tempTexture.SetPixel(x, sizey-1, new Color(1, 0, 0, 1));
+                tempTexture.SetPixel(x, sizey - 1, new Color(1, 0, 0, 1));
             }
             for (int y = 0; y < sizey; y++)
             {
                 tempTexture.SetPixel(0, y, new Color(1, 0, 0, 1));
             }
-
             tempTexture.Apply();
-            lastTexture = tempTexture;
             return tempTexture;
-            
         }
 
-        float TimefromSamples(int samples,int samplerate)
+        float TimefromSamples(int samples, int samplerate)
         {
             if (samplerate == 0)
             {
-                samplerate=44100;
+                samplerate = 44100;
             }
             return ((float)samples) / samplerate;
+        }
+    }
+
+    class Texture2DStack
+    {
+        Texture2D _root = Texture2D.whiteTexture;
+        Texture2D root
+        {
+            get
+            {
+                return _root;
+            }
+            set
+            {
+                if (_root != value)
+                {
+                    _root = value;
+                    RefreshStack();
+                }
+            }
+        }
+
+        List<Func<Texture2D, Texture2D>> functionStack = new List<Func<Texture2D, Texture2D>>();
+
+        List<Texture2D> textureStack = new List<Texture2D>();
+        public Texture2D finalTexture2D
+        {
+            get
+            {
+                if (textureStack.Count > 0)
+                {
+                    return textureStack[textureStack.Count - 1];
+                }
+                return root;
+            }
+        }
+
+        void AddToTextureStack(int _index, Texture2D texture2D)
+        {
+            if (textureStack.Count > _index)
+            {
+                textureStack[_index] = texture2D;
+            }
+            else
+            {
+                textureStack.Add(texture2D);
+            }
+        }
+        public void AddToStack(Func<Texture2D, Texture2D> stackFunction)
+        {
+            functionStack.Add(stackFunction);
+            RecalculateTextureStackAtPoint(functionStack.Count);
+        }
+        public void AddToStack(int _index, Func<Texture2D, Texture2D> stackFunction)
+        {
+            functionStack.Insert(_index, stackFunction);
+            RecalculateTextureStackAtPoint(_index);
+        }
+
+        void RecalculateTextureStack()
+        {
+            if (functionStack.Count < 1) { return; }
+            AddToTextureStack(0, functionStack[0](root));
+            for (int i = 1; i < functionStack.Count; i++)
+            {
+                AddToTextureStack(i, functionStack[i](textureStack[i - 1]));
+            }
+        }
+        void RecalculateTextureStackAtPoint(int _index)
+        {
+            if (functionStack.Count <= _index) { return; }
+            if (_index < 1) { RecalculateTextureStack(); return; }
+            for (int i = _index; i < functionStack.Count; i++)
+            {
+                AddToTextureStack(i, functionStack[i](textureStack[i - 1]));
+            }
+        }
+
+        void RefreshStack()
+        {
+            textureStack.Clear();
+            RecalculateTextureStack();
         }
     }
 
