@@ -34,6 +34,8 @@ namespace WaterKat.AudioEditor
         int ImageHeight = 20;
         Vector2Int previousScreenSize = Vector2Int.one;
 
+        Texture2DStack AudioPreviewStack = new Texture2DStack();
+
         GUIStyle ImagePreviews;
         GUIStyle LabelRightAligned;
         GUIStyle LabelCenterAligned;
@@ -149,6 +151,38 @@ namespace WaterKat.AudioEditor
             }
         }
 
+        Texture2D SpectrographTexture(Texture2D _inputTexture)
+        {
+            Color innerFill = new Color(0.04705882352f, 0.60392156862f, 0.70196078431f);
+            Color outerFill = new Color(0.04705882352f, 0.60392156862f, 0.70196078431f);
+            int originOffset = _inputTexture.height / 2;
+
+            if (sourceClip == null) { return _inputTexture; }
+
+            float[] audioData = new float[sourceClip.samples * sourceClip.channels];
+            sourceClip.GetData(audioData, 0);
+
+            for (int x = 0; x < _inputTexture.width; x++)
+            {
+                float startIndex = ZoomSlider.minValue / (ZoomSlider.maxLimit - ZoomSlider.minLimit) * audioData.Length;
+                float endIndex = ZoomSlider.maxValue / (ZoomSlider.maxLimit - ZoomSlider.minLimit) * audioData.Length;
+                float relativeIndex = (float)x / (float)_inputTexture.width;
+                int currentIndex = Mathf.FloorToInt(((1 - relativeIndex) * startIndex) + (relativeIndex * endIndex));
+
+                float scaledSample = audioData[currentIndex] * originOffset;
+
+                for (int i = 0; Mathf.Abs(i) < Mathf.Abs(scaledSample); i += (int)Mathf.Sign(scaledSample))
+                {
+                    _inputTexture.SetPixel(x, Mathf.Clamp(i + originOffset, 0, _inputTexture.height), innerFill);
+                }
+
+                _inputTexture.SetPixel(x, (int)scaledSample + originOffset, outerFill);
+            }
+
+            _inputTexture.Apply();
+            return _inputTexture;
+        }
+
         string timeFloatToString(float desiredTime)
         {
             return Mathf.FloorToInt(desiredTime / 60).ToString("00") + ":" + ((desiredTime) % 60).ToString("00.00");
@@ -165,10 +199,10 @@ namespace WaterKat.AudioEditor
 
     class TimeTexture
     {
-        public float TotalLength;
-        public float startLength;
-        public float endLength;
-        public Texture2D lastTexture;
+        //public float TotalLength;
+        //public float startLength;
+        //public float endLength;
+        //public Texture2D lastTexture;
 
         void normalizeData(float[] table)
         {
@@ -371,9 +405,38 @@ namespace WaterKat.AudioEditor
             RecalculateTextureStack();
         }
 
-        Texture2DStack(int sizeX,int sizeY)
+        public void ResizeRoot(int sizeX, int sizeY)
         {
-            root = new Texture2D
+            root = new Texture2D(sizeX, sizeY, TextureFormat.ARGB32, false);
+        }
+        public void ResizeRoot(int sizeX, int sizeY, Color backgroundColor)
+        {
+            root = new Texture2D(sizeX, sizeY, TextureFormat.ARGB32, false);
+            Color[] colors = new Color[sizeX * sizeY];
+            for (int i = 0; i < colors.Length; i++)
+            {
+                colors[i] = backgroundColor;
+            }
+            root.SetPixels(colors);
+        }
+
+        public Texture2DStack()
+        {
+            root = Texture2D.whiteTexture;
+        }
+        public Texture2DStack(int sizeX, int sizeY)
+        {
+            root = new Texture2D(sizeX, sizeY, TextureFormat.ARGB32, false);
+        }
+        public Texture2DStack(int sizeX, int sizeY, Color backgroundColor)
+        {
+            root = new Texture2D(sizeX, sizeY, TextureFormat.ARGB32, false);
+            Color[] colors = new Color[sizeX * sizeY];
+            for (int i = 0; i < colors.Length; i++)
+            {
+                colors[i] = backgroundColor;
+            }
+            root.SetPixels(colors);
         }
     }
 
