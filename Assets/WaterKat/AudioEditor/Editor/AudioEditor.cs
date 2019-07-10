@@ -36,6 +36,8 @@ namespace WaterKat.AudioEditor
 
         Texture2DStack AudioPreviewStack;
 
+        Vector2 LastMousePosition = Vector2.zero;
+
         GUIStyle ImagePreviews;
         GUIStyle LabelRightAligned;
         GUIStyle LabelCenterAligned;
@@ -65,7 +67,7 @@ namespace WaterKat.AudioEditor
         private void OnWindowSizeUpdate()
         {
             ImageWidth = (int)position.width - 14;
-            AudioPreviewStack.ResizeRoot(ImageWidth, ImageHeight*4);
+            AudioPreviewStack.ResizeRoot(ImageWidth, ImageHeight*5);
         }
 
         private void OnEnable()
@@ -73,11 +75,19 @@ namespace WaterKat.AudioEditor
             AudioPreviewStack = new Texture2DStack();
             AudioPreviewStack.AddToStack(SpectrographStackFunc);
             AudioPreviewStack.AddToStack(TimeMarkerStackFunc);
+            AudioPreviewStack.AddToStack(CursorLineStackFunc);
             AudioPreviewStack.RecalculateTextureStack();
         }
 
         private void OnGUI()
         {
+
+                if (Event.current.mousePosition != LastMousePosition)
+                {
+                    LastMousePosition = Event.current.mousePosition;
+                }
+            
+
             if (ImagePreviews == null) { CreateStyles(); }
 
             if (AudioPreviewStack == null) { AudioPreviewStack = new Texture2DStack(); }
@@ -126,7 +136,13 @@ namespace WaterKat.AudioEditor
 
                 GUILayout.Box(test.SpectrographIcon(ImageWidth, ImageHeight, sourceClip), ImagePreviews);
 
+                float lastmin = ZoomSlider.minValue;
+                float lastmax = ZoomSlider.maxValue;
                 EditorGUILayout.MinMaxSlider(ref ZoomSlider.minValue, ref ZoomSlider.maxValue, ZoomSlider.minLimit, ZoomSlider.maxLimit);
+                if ((lastmin != ZoomSlider.minValue)|| (lastmax != ZoomSlider.maxValue))
+                {
+                    AudioPreviewStack.RecalculateTextureStackAtPoint(0);
+                }
                 //ZoomSlider.minValue = Mathf.FloorToInt(ZoomSlider.minValue);
                 //ZoomSlider.maxValue = Mathf.Min(Mathf.CeilToInt(ZoomSlider.maxValue), ZoomSlider.maxLimit);
             }//Zoom
@@ -145,21 +161,22 @@ namespace WaterKat.AudioEditor
                 GUILayout.Label(timeFloatToString(ZoomSlider.maxValue), LabelRightAligned);
                 GUILayout.EndHorizontal();
 
-
-
                 GUILayout.Space(15);
 
-                AudioPreviewStack.RecalculateTextureStack();
+                //                AudioPreviewStack.RecalculateTextureStack();
                 GUILayout.Box(AudioPreviewStack.finalTexture2D, ImagePreviews);
 
-                Rect barRect = GUILayoutUtility.GetLastRect();
-                Vector2 mousePosition = Event.current.mousePosition;
 
-                if (Event.current.type == EventType.Repaint && barRect.Contains(mousePosition))
+                Rect barRect = GUILayoutUtility.GetLastRect();
+
+                if (barRect.Contains(LastMousePosition))
                 {
-                    float relativeMousePosition = relativePosition(mousePosition.x, barRect.x, barRect.x + barRect.width);
+                    AudioPreviewStack.RecalculateTextureStackAtPoint(2);
+
+                    int marginOffset = Mathf.FloorToInt((50 / 2) + ImagePreviews.margin.left);
+                    float relativeMousePosition = relativePosition(LastMousePosition.x, barRect.x, barRect.x + barRect.width);
                     float relativeTime = Mathf.Lerp(ZoomSlider.minValue, ZoomSlider.maxValue, relativeMousePosition);
-                    GUI.Label(new Rect(mousePosition.x-150, barRect.y-(ImageHeight*3), 300, 100), timeFloatToString(relativeTime),LabelCenterAligned);
+                    GUI.Label(new Rect(Mathf.Clamp(LastMousePosition.x, 0 + marginOffset, position.width - marginOffset) - 150, barRect.y - (ImageHeight * 3), 300, 100), timeFloatToString(relativeTime), LabelCenterAligned);
                 }
             }
         }
@@ -200,16 +217,25 @@ namespace WaterKat.AudioEditor
         {
             if (sourceClip == null) { return _inputTexture; }
 
-            Color lineFill = new Color(0.04705882352f, 0.60392156862f, 0.70196078431f);
-            float startTime = ZoomSlider.minValue;
-            float endTime = ZoomSlider.maxValue;
+            Color lineFill = new Color(0f, 0f, 0f, 1f);
 
-            int relativeX = Mathf.FloorToInt(AudioEditor.relativePosition(Event.current.mousePosition.x, startTime, endTime) * sizeX);
-                for (int y = sizeY - Mathf.FloorToInt(maxMarkerLength * BarLengths[i]); y < sizeY; y++)
-                {
-                    _inputTexture.SetPixel(relativeX, y, new Color(1 * (1 - Mathf.Pow((float)i / times, 2)), 0, (float)i / times, 1));
-                }
+
+            int sizeX = _inputTexture.width;
+            int sizeY = _inputTexture.height;
+
+            int maxMarkerLength = sizeY / 2;
+
+
+            float firstPosition  = 0 + ImagePreviews.margin.left;
+            float lastPosition = position.width-ImagePreviews.margin.right;
+
+            int relativeX = Mathf.FloorToInt(AudioEditor.relativePosition(LastMousePosition.x, firstPosition, lastPosition) * sizeX);
+
+            for (int y = 0; y < sizeY; y++)
+            {
+                _inputTexture.SetPixel(relativeX, y, lineFill);
             }
+
 
             _inputTexture.Apply();
             return _inputTexture;
@@ -468,14 +494,14 @@ namespace WaterKat.AudioEditor
                 AddToTextureStack(i, functionStack[i](newTexture));
             }
         }
-        void RecalculateTextureStackAtPoint(int _index)
+        public void RecalculateTextureStackAtPoint(int _index)
         {
             if (functionStack.Count <= _index) { return; }
             if (_index < 1) { RecalculateTextureStack(); return; }
             for (int i = _index; i < functionStack.Count; i++)
             {
                 Texture2D originalTexture = textureStack[i - 1];
-                Texture2D newTexture = new Texture2D(originalTexture.width, originalTexture.height);
+                Texture2D newTexture = new Texture2D(originalTexture.width, originalTexture.height, TextureFormat.ARGB32, false);
                 Graphics.CopyTexture(originalTexture, newTexture);
                 AddToTextureStack(i, functionStack[i](newTexture));
             }
