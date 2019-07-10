@@ -29,7 +29,7 @@ namespace WaterKat.AudioEditor
             window.Show();
         }
 
-        TimeTexture test = new TimeTexture();
+        //TimeTexture test = new TimeTexture();
         int ImageWidth = 10;
         int ImageHeight = 20;
         Vector2Int previousScreenSize = Vector2Int.one;
@@ -61,7 +61,7 @@ namespace WaterKat.AudioEditor
             ZoomSlider.maxLimit = (float)sourceClip.samples * (float)sourceClip.channels / (float)sourceClip.frequency;
             ZoomSlider.minLimit = 0;
             ZoomSlider.ReAlignValues();
-
+            AudioPreviewStack.RecalculateTextureStack();
         }
 
         private void OnWindowSizeUpdate()
@@ -134,7 +134,7 @@ namespace WaterKat.AudioEditor
             {
                 GUILayout.Label("Zoom", EditorStyles.boldLabel);
 
-                GUILayout.Box(test.SpectrographIcon(ImageWidth, ImageHeight, sourceClip), ImagePreviews);
+                //GUILayout.Box(test.SpectrographIcon(ImageWidth, ImageHeight, sourceClip), ImagePreviews);
 
                 float lastmin = ZoomSlider.minValue;
                 float lastmax = ZoomSlider.maxValue;
@@ -295,7 +295,7 @@ namespace WaterKat.AudioEditor
     }
 
 
-
+    /*
     class TimeTexture
     {
         //public float TotalLength;
@@ -422,7 +422,7 @@ namespace WaterKat.AudioEditor
             return ((float)samples) / samplerate;
         }
     }
-
+    */
     class Texture2DStack
     {
         Texture2D _root;
