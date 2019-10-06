@@ -39,6 +39,7 @@ namespace WaterKat.WKPlayer
 
             EditorGUILayout.Space();
 
+            EditorGUI.indentLevel += 1;
             switch (calculationMode.enumValueIndex)
             {
                 case 0:
@@ -54,8 +55,14 @@ namespace WaterKat.WKPlayer
                     EditorGUILayout.PropertyField(JumpTime);
                     break;
             }
+            EditorGUI.indentLevel -= 1;
 
-                
+            EditorGUILayout.Space();
+
+            EditorGUI.BeginDisabledGroup(true);
+            
+            EditorGUI.EndDisabledGroup();
+
             serializedObject.ApplyModifiedProperties();
         }
     }
