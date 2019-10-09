@@ -2,10 +2,10 @@
 using UnityEditor;
 using WaterKat.MathW;
 
-namespace WaterKat.WKPlayer
+namespace WaterKat.WKPlayer2D
 {
-    [CustomEditor(typeof(Jump))]
-    public class JumpEditor : Editor
+    [CustomEditor(typeof(Jump2D))]
+    public class Jump2DEditor : Editor
     {
         SerializedProperty calculationMode;
 

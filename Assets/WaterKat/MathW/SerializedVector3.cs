@@ -2,22 +2,33 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SerializedVector3 : MonoBehaviour
+namespace WaterKat.MathW
 {
-    public float x;
-    public float y;
-    public float z;
-    /*
-    public  SerializedVector3(Vector3 vector3) 
+    [System.Serializable]
+    public class SerializedVector3
     {
-        if (digit > 9)
-        {
-            throw new ArgumentOutOfRangeException(nameof(digit), "Digit cannot be greater than nine.");
-        }
-        this.digit = digit;
-    }
+        public float x;
+        public float y;
+        public float z;
 
-    public static implicit operator (Digit d) => d.digit;
-    public static explicit operator Digit(byte b) => new Digit(b);
-    */
+        public Vector3 vector3
+        {
+            get
+            {
+                return new Vector3(x, y, z);
+            }
+        }
+
+        public SerializedVector3(Vector3 vector3)
+        {
+            this.x = vector3.x;
+            this.y = vector3.y;
+            this.z = vector3.z;
+        }
+
+        public static explicit operator Vector3(SerializedVector3 sVector3)
+        {
+            return sVector3.vector3;
+        }
+    }
 }

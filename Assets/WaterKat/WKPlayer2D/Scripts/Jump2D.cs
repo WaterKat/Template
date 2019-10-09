@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using WaterKat.MathW;
 
-namespace WaterKat.WKPlayer
+namespace WaterKat.WKPlayer2D
 {
-    [RequireComponent(typeof(Collider))]
-    [RequireComponent(typeof(Rigidbody))]
-    public class Jump : MonoBehaviour
+    [RequireComponent(typeof(Collider2D))]
+    [RequireComponent(typeof(Rigidbody2D))]
+    public class Jump2D : MonoBehaviour
     {
         public enum CalculationModes
         {
@@ -25,13 +25,13 @@ namespace WaterKat.WKPlayer
         [SerializeField]
         float JumpVelocity = 0.0f;
 
-        Rigidbody playerRigidBody;
-        Collider playerCollider;
+        Rigidbody2D playerRigidBody;
+        Collider2D playerCollider;
 
         private void Start()
         {
-            playerRigidBody = GetComponent<Rigidbody>();
-            playerCollider = GetComponent<Collider>();
+            playerRigidBody = GetComponent<Rigidbody2D>();
+            playerCollider = GetComponent<Collider2D>();
 
             CalculateJumpValues();
         }
@@ -62,7 +62,7 @@ namespace WaterKat.WKPlayer
         private void FixedUpdate()
         {
             CalculateJumpValues();
-            playerRigidBody.velocity += Vector3.down * Gravity * Time.fixedDeltaTime;
+            playerRigidBody.velocity += Vector2.down * Gravity * Time.fixedDeltaTime;
         }
 
         private void Update()
