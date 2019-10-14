@@ -62,7 +62,7 @@ namespace WaterKat.WKPlayer
         private void FixedUpdate()
         {
             CalculateJumpValues();
-            playerRigidBody.velocity += Vector3.down * Gravity * Time.fixedDeltaTime;
+            playerRigidBody.velocity += Vector3.down * Gravity * UnityEngine.Time.fixedDeltaTime;
         }
 
         private void Update()

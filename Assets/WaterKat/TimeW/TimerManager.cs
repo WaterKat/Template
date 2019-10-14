@@ -3,7 +3,7 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-namespace WaterKat.Time
+namespace WaterKat.OLD_Time
 {
     public class TimerManager : MonoBehaviour
     {

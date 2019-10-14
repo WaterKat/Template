@@ -8,10 +8,6 @@ namespace WaterKat.TimeW
     {
         private static ClockManager _singleton = null;
         private static readonly object _lockobject = new object();
-
-        [SerializeField]
-        private DateTime activationTime = new DateTime();
-
         public static ClockManager instance
         {
             get
@@ -23,7 +19,7 @@ namespace WaterKat.TimeW
                 else
                 {
                     GameObject newHome = new GameObject();
-                    newHome.name = "TimerManager";
+                    newHome.name = typeof(ClockManager).Name;
                     ClockManager newClockManager = newHome.AddComponent<ClockManager>();
                     return newClockManager;
                 }
@@ -52,6 +48,9 @@ namespace WaterKat.TimeW
             activationTime = DateTime.Now;
         }
 
+        [SerializeField]
+        private DateTime activationTime = new DateTime();
+
         public static long deltaTicks
         {
             get
@@ -59,7 +58,6 @@ namespace WaterKat.TimeW
                 return (DateTime.Now - ClockManager.instance.activationTime).Ticks;
             }
         }
-
         public static double deltaSeconds
         {
             get
@@ -67,13 +65,20 @@ namespace WaterKat.TimeW
                 return (deltaTicks / (double)10000000);
             }
         }
-
         public static double deltaMinutes
         {
             get
             {
                 return (deltaTicks / (double)600000000);
             }
+        }
+        public static double TicksToSeconds(long _ticks)
+        {
+            return (_ticks / (double)10000000);
+        }
+        public static double TicksToMinutes(long _ticks)
+        {
+            return (_ticks / (double)600000000);
         }
 
         [System.Serializable]
@@ -122,7 +127,7 @@ namespace WaterKat.TimeW
 
         Dictionary<int, Clock> Clocks = new Dictionary<int, Clock>();
         System.Random currentRandom = new System.Random();
-        public static int AddClock(float _duration)
+        public static int AddClock(double _duration)
         {
             int randomKey = ClockManager.instance.currentRandom.Next(-2147483648, 2147483647);
             while (ClockManager.instance.Clocks.ContainsKey(randomKey))
@@ -133,6 +138,51 @@ namespace WaterKat.TimeW
             ClockManager.instance.Clocks.Add(randomKey, new Clock(_duration));
 
             return randomKey;
+        }
+        public static void OverrideClock(int _clockID, double _duration)
+        {
+            if (ClockManager.instance.Clocks.ContainsKey(_clockID))
+            {
+                ClockManager.instance.Clocks[_clockID] = new Clock(_duration);
+            }
+        }
+        public static void RemoveClock(int _clockID)
+        {
+            if (ClockManager.instance.Clocks.ContainsKey(_clockID))
+            {
+                ClockManager.instance.Clocks.Remove(_clockID);
+            }
+        }
+
+        public static bool ClockMet(int _clockID)
+        {
+            if (ClockManager.instance.Clocks.ContainsKey(_clockID))
+            {
+                Clock _clock = ClockManager.instance.Clocks[_clockID];
+                if (ClockManager.deltaSeconds >= _clock.EndTime)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public static double ClockTimeElapsed(int _clockID)
+        {
+            if (ClockManager.instance.Clocks.ContainsKey(_clockID))
+            {
+                Clock _clock = ClockManager.instance.Clocks[_clockID];
+                return ClockManager.deltaSeconds - _clock.StartTime;
+            }
+            return 0;
+        }
+        public static double ClockRelativeTimeElapsed(int _clockID)
+        {
+            if (ClockManager.instance.Clocks.ContainsKey(_clockID))
+            {
+                Clock _clock = ClockManager.instance.Clocks[_clockID];
+                return (ClockManager.deltaSeconds - _clock.StartTime) / (_clock.EndTime - _clock.StartTime);
+            }
+            return 0;
         }
     }
 }
