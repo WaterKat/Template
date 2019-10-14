@@ -111,9 +111,12 @@ namespace WaterKat.TimeW
                 EndTime = _endTime;
                 StartTime = _startTime;
             }
-            public static Clock ClockFromDuration(double _startTime, double _duration)
+            public Clock(double _duration)
             {
-                return new Clock(_startTime, _startTime + _duration);
+                endTime = 0;
+                startTime = 0;
+                EndTime = ClockManager.deltaSeconds + _duration;
+                StartTime = ClockManager.deltaSeconds;
             }
         }
 
@@ -127,7 +130,9 @@ namespace WaterKat.TimeW
                 randomKey = ClockManager.instance.currentRandom.Next(-2147483648, 2147483647);
             }
 
-            ClockManager.instance.Clocks.Add(randomKey,Clock.ClockFromDuration())
+            ClockManager.instance.Clocks.Add(randomKey, new Clock(_duration));
+
+            return randomKey;
         }
     }
 }
