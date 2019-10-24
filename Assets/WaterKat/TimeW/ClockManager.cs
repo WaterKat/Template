@@ -130,12 +130,24 @@ namespace WaterKat.TimeW
         public static int AddClock(double _duration)
         {
             int randomKey = ClockManager.instance.currentRandom.Next(-2147483648, 2147483647);
-            while (ClockManager.instance.Clocks.ContainsKey(randomKey))
+            while (ClockManager.instance.Clocks.ContainsKey(randomKey)||(randomKey==0))
             {
                 randomKey = ClockManager.instance.currentRandom.Next(-2147483648, 2147483647);
             }
 
             ClockManager.instance.Clocks.Add(randomKey, new Clock(_duration));
+
+            return randomKey;
+        }
+        public static int AddDelayedClock(double _delay, double _duration)
+        {
+            int randomKey = ClockManager.instance.currentRandom.Next(-2147483648, 2147483647);
+            while (ClockManager.instance.Clocks.ContainsKey(randomKey) || (randomKey == 0))
+            {
+                randomKey = ClockManager.instance.currentRandom.Next(-2147483648, 2147483647);
+            }
+
+            ClockManager.instance.Clocks.Add(randomKey, new Clock(ClockManager.deltaSeconds+_delay, ClockManager.deltaSeconds + _delay+_duration));
 
             return randomKey;
         }
@@ -165,6 +177,18 @@ namespace WaterKat.TimeW
                 }
             }
             return false;
+        }
+        public static bool ClockStarted(int _clockID)
+        {
+            if (ClockManager.instance.Clocks.ContainsKey(_clockID))
+            {
+                Clock _clock = ClockManager.instance.Clocks[_clockID];
+                if (ClockManager.deltaSeconds < _clock.StartTime)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
         public static double ClockTimeElapsed(int _clockID)
         {

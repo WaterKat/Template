@@ -66,7 +66,7 @@ namespace WaterKat.TimeW
         public static int AddTask(Action _timedAction, double _delay)
         {
             int randomKey = TaskManager.instance.currentRandom.Next(-2147483648, 2147483647);
-            while (TaskManager.instance.Tasks.ContainsKey(randomKey))
+            while (TaskManager.instance.Tasks.ContainsKey(randomKey)||(randomKey == 0))
             {
                 randomKey = TaskManager.instance.currentRandom.Next(-2147483648, 2147483647);
             }
@@ -79,6 +79,7 @@ namespace WaterKat.TimeW
         {
             if (TaskManager.instance.Tasks.ContainsKey(_taskID))
             {
+                ClockManager.RemoveClock(TaskManager.instance.Tasks[_taskID].ClockID);
                 TaskManager.instance.Tasks.Remove(_taskID);
             }
         }
@@ -112,7 +113,6 @@ namespace WaterKat.TimeW
                 {
                     RunTask(_keyValuePair.Key);
                     RemoveTask(_keyValuePair.Key);
-                    ClockManager.RemoveClock(_keyValuePair.Value.ClockID);
                 }
             }
         }
