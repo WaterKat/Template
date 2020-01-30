@@ -154,7 +154,7 @@ namespace WaterKat.AudioManager
                 return;
             }
         }
-
+#if (UNITY_EDITOR) 
         [ContextMenu("UpdateAssets() Warning! This WILL override CURRENT DATA!")]
         void UpdateAssets()
         {
@@ -176,5 +176,6 @@ namespace WaterKat.AudioManager
                 AudioClips.Add(audioInterface);
             }
         }
+#endif
     }
 }
